@@ -28,6 +28,7 @@ exports.signup = async (req, res) => {
                                 id: user[0].id,
                                 username: user[0].username,
                                 email: user[0].email,
+                                roll: user[0].roll
                             };
                             const token = jwt.sign(senduser, process.env.TOKEN_SECRET, { expiresIn: '1d' });
                             res.status(201).json({ token, auth: true });
@@ -54,15 +55,15 @@ exports.signin = async (req, res) => {
         if (result.length > 0) {
             const comp = await bcrypt.compare(password, result[0].password);
             if (comp) {
-                const { id, username, email } = result[0];
-                const user = { id, username, email };
+                const { id, username, email, roll } = result[0];
+                const user = { id, username, email, roll };
                 const token = await jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: '1d' });
                 res.status(200).json({ token, auth: true });
             } else {
-                res.json({ err: 'invalid credentials', auth: false })
+                res.json({ err: 'invalid credentials', auth: false });
             }
         } else {
-            res.json({ err: 'no user found', auth: false })
+            res.json({ err: 'no user found', auth: false });
         }
     })
 }
@@ -73,13 +74,17 @@ exports.admin = (req, res) => {
     const query = 'SELECT * FROM users';
     db.query(query, (err, result) => {
         if (err) {
-            return res.json({ err, auth: true });
+            return res.json({ err: 'failed to getuser', auth: true });
         }
         if (result.length > 0) {
-            return res.json({ result, user: req.user })
+            return res.json({ result, user: req.user, auth: true })
         }
         else {
-            return res.json({ err: "no user exists", user: req.user })
+            return res.json({ err: "no user exists", user: req.user, auth: true })
         }
     })
+}
+
+exports.home = (req, res) => {
+    res.json({ user: req.user, auth: true })
 }
