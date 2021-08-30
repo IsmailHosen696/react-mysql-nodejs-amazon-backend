@@ -13,7 +13,7 @@ exports.signup = async (req, res) => {
         const insertuserquery = `INSERT INTO users(username,email,password) VALUES(?,?,?);`;
         const finduserwithidjwt = `SELECT * FROM users where id = ?;`;
         await db.query(checkquery, [email, username], async (err, result) => {
-            if (result.length > 0) {
+            if (result?.length > 0) {
                 return res.json({ err: "user name or email already taken please use a different one", auth: false });
             } else {
                 const salt = await bcrypt.genSalt(10)
@@ -28,7 +28,7 @@ exports.signup = async (req, res) => {
                                 id: user[0].id,
                                 username: user[0].username,
                                 email: user[0].email,
-                                roll: user[0].roll
+                                role: user[0].role
                             };
                             const token = jwt.sign(senduser, process.env.TOKEN_SECRET, { expiresIn: '1d' });
                             res.status(201).json({ token, auth: true });
@@ -55,8 +55,8 @@ exports.signin = async (req, res) => {
         if (result.length > 0) {
             const comp = await bcrypt.compare(password, result[0].password);
             if (comp) {
-                const { id, username, email, roll } = result[0];
-                const user = { id, username, email, roll };
+                const { id, username, email, role } = result[0];
+                const user = { id, username, email, role };
                 const token = await jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: '1d' });
                 res.status(200).json({ token, auth: true });
             } else {

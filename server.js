@@ -14,6 +14,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('/', authroute);
+app.use('/products', require('./routes/productroutes'));
 
 
 app.listen(3001, () => console.log(`server started on ${port}`));
